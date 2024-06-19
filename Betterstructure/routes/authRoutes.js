@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { checkSession } = require('./utils');
+const { checkSession } = require('../utils/utils');
 
 // Mit Hilfestellung von AI erstellt
 /**
@@ -10,7 +10,7 @@ const { checkSession } = require('./utils');
 * @method POST
 * @route localhost:3000/login
 * @type Content-Type: application/json
-* @body { "email": "zli", "password": "m295" }
+* @body { "email": "random", "password": "m295" }
 * @success 200 {Object} swagger-autput.json
 * @failure 404 {string} - "credentials are missing"
 * @failure 500 {string} - "Server error."

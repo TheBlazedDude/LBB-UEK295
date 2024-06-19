@@ -1,8 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const session = require('express-session');
-const bookRoutes = require('./bookRoutes');
-const authRoutes = require('./authRoutes');
+const taskRoutes = require('./routes/taskRoutes');
+const authRoutes = require('./routes/authRoutes');
 const swaggerAutogen = require('swagger-autogen');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger-output.json');
@@ -21,7 +21,7 @@ app.use(session({
 }));
 
 
-app.use('/books', bookRoutes); // /books -> /books/books/1
+app.use('/tasks', taskRoutes); // /tasks -> /tasks/tasks/1
 app.use('/auth', authRoutes); // /auth -> /auth/login or verify or logout
 
 

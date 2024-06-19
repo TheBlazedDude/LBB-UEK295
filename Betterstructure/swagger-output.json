@@ -1,0 +1,239 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "LBB_BenBrc",
+    "description": "tasks und Sessions(=auth). Damit Sie überhaupt eine Tasks Anfrage abschicken können, müssen sie erstmal eingeloggt sein. dafür wird jeder Benutzername akzeptiert, nur das passwort muss m295 sein. Benutzt wurden für das Projekt express, express-session, dotenv, swagger-autogen, swagger-ui-express.  Um das Projekt zu starten, müssen sie innerhalb des defaultordners 'node endpunkte.js' laufen lassen. Danach können sie auf localhost:3000 die Endpunkte sehen und testen.",
+    "author": "Benedict Brück",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Tasks",
+      "description": "Tasks API"
+    },
+    {
+      "name": "Auth",
+      "description": "Sessions API"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/tasks": {
+      "get": {
+        "tags": ["Tasks"],
+        "description": "Retrieve all tasks",
+        "produces": [ "application/json"],
+        "responses": { "201": { "description": "Created"},
+                       "401": { "description": "Unauthorized"},
+                       "422": { "description": "unprocessable Entity"},
+                       "500": { "description": "server error"}
+                      }
+      },
+      "post": {
+        "tags": ["Tasks"],
+        "description": "Create a new task",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "example": "Hello World"
+                },
+                "description": {
+                  "example": "this is a description"
+                },
+                "done": {
+                  "example": true
+                },
+                "dueDate": {
+                  "example": "12.08.24"
+                },
+                "year": {
+                  "example": 2024
+                },
+                "author": {
+                  "example": "Benedict Brück"
+                }
+              }
+            }
+          }
+        ],
+        "responses": { 
+          "200": { "description": "ok"},
+          "401": { "description": "Unauthorized"},
+          "404": { "description": "not found"},
+          "500": { "description": "server error"}
+       }
+      }
+    },
+    "/tasks/{id}": {
+      "get": {
+        "tags": ["Tasks"],
+        "description": "get a single Task by id",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": { 
+        "200": { "description": "ok"},
+        "401": { "description": "Unauthorized"},
+        "404": { "description": "not found"},
+        "500": { "description": "server error"}
+       }
+      },
+      "put": {
+        "tags": ["Tasks"],
+        "description": "update a single Task via id",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "example": "Hello World"
+                },
+                "description": {
+                  "example": "this is a description"
+                },
+                "done": {
+                  "example": true
+                },
+                "dueDate": {
+                  "example": "12.08.24"
+                },
+                "year": {
+                  "example": 2024
+                },
+                "author": {
+                  "example": "Benedict Brück"
+                }
+              }
+            }
+          }
+        ],
+        "responses": { 
+          "200": { "description": "ok"},
+          "400": { "description": "Bad Request"},
+          "401": { "description": "Unauthorized"},
+          "404": { "description": "not found"},
+          "500": { "description": "server error"}
+       }
+      },
+      "delete": {
+        "tags": ["Tasks"],
+        "description": "lösche einen Task via id",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": { 
+          "204": { "description": "No Content"},
+          "404": { "description": "not found"},
+          "422": { "description": "unprocessable Entity"},
+          "500": { "description": "server error"}
+       }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": ["Auth"],
+        "description": "Logge dich ein, um Tasks Endpunkte nutzen zu können",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EMAIL": {
+                  "example": "Ben"
+                },
+                "PASSWORD": {
+                  "example": "m295"
+                }
+              }
+            }
+          }
+        ],
+        "responses": { 
+          "200": { "description": "ok"},
+          "401": { "description": "Unauthorized"},
+          "422": { "description": "unprocessable Entity"},
+          "500": { "description": "server error"}
+       }
+      }
+    },
+    "/verify": {
+      "get": {
+        "tags": ["Auth"],
+        "description": "verifiziere ob du authentifiziert bist",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": { "description": "ok"},
+          "401": { "description": "Unauthorized"},
+          "404": { "description": "not found"},
+          "500": { "description": "server error"}
+        }
+      }
+    },
+    "/logout": {
+      "delete": {
+        "tags": ["Auth"],
+        "description": "Logout, invalidate the session",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "204": { "description": "No Content"},
+          "401": { "description": "Unauthorized"},
+          "404": { "description": "not found"},
+          "500": { "description": "server error"}
+
+        }
+      }
+    }
+  }
+}
+
+
+

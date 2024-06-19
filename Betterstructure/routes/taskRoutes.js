@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const router = express.Router();
-const { checkSession } = require('./utils');
+const { checkSession } = require('../utils/utils');
 
 // setup: 2 tasks
 const tasks = [{
