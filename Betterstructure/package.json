@@ -1,0 +1,22 @@
+{
+  "name": "betterstructure",
+  "version": "1.0.0",
+  "description": "tasks and auth for LBB",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "LBB-UEK295"
+  },
+  "author": "Benedict Brück",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

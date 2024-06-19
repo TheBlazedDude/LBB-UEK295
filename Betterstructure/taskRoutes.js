@@ -1,30 +1,9 @@
 const express = require('express');
-const dotenv = require('dotenv');
-var session = require('express-session')
-const swaggerAutogen = require('swagger-autogen');
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger-output.json');
-
 const app = express();
-const port = 3000;
+const router = express.Router();
+const { checkSession } = require('./utils');
 
-app.use(express.json())
-
-// session with cookie
-app.use(session({
-    secret: 'BenedictsKey',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false, maxAge: 1000 * 60 * 5 } // max 5 minuten authenticated, have fun
-  }));
-// body = {
-    //     title: "The Fall"
-    //    "description": "this is a description of the task",
-    //    "done": true,
-    //    "dueDate": "27.08.1996",
-    //     year: 1996,
-    //     author: "Benedict Brück"  
-    // }
+// setup: 2 tasks
 const tasks = [{
     id: 1,
     "title": "The Fall",
@@ -48,22 +27,10 @@ const users = {};
 
 const tokens = {};
 
-
-dotenv.config();
-users[process.env.EMAIL] = process.env.password;
-if (!process.env.password) {
-    console.error('PASSWORD must be set in the .env file');
-    process.exit(1);
-}
-/** 
-*@name swagger-Documentation
-*@route localhost:3000/swagger-ui
-*/
-app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
 // Mit Hilfestellung von AI erstellt
 /**
 * @name GET tasks
+* @description Get all tasks
 * @tags Tasks
 * @method GET
 * @route localhost:3000/tasks
@@ -75,7 +42,7 @@ app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 * @failure 500 {Object} error - "Server error"
 */
 // Ende AI-Eingriff
-app.get('/tasks', (req, res) => {
+router.get('/tasks', (req, res) => {
     if (!checkSession(req)) {
         console.warn("session check failed");
         return res.status(401).json({ error: "unauthorized" });
@@ -89,11 +56,12 @@ app.get('/tasks', (req, res) => {
         console.error(error);
         res.setHeader('Content-Type', 'application/json').status(500).json({ error: 'Server error' }).end();
     }
-})
+});
 
 // Mit Hilfestellung von AI erstellt
 /**
 * @name POST task
+* @description Create a task
 * @tags Tasks
 * @method POST
 * @route localhost:3000/tasks
@@ -105,7 +73,7 @@ app.get('/tasks', (req, res) => {
 * @failure 500 {string} - "Server error"
 */
 // Ende AI-Eingriff
-app.post('/tasks', (req, res) => {
+router.post('/tasks', (req, res) => {
     if (!checkSession(req)) {
         console.warn("session check failed");
         return res.status(401).json({ error: "unauthorized" });
@@ -139,12 +107,13 @@ app.post('/tasks', (req, res) => {
         console.error(error);
         res.setHeader('Content-Type', 'application/json').status(500).json({ error: 'Server error' }).end();
     }
-    
-})
+});
+
 
 // Mit Hilfestellung von AI erstellt
 /**
 * @name GET task
+* @description Get a task
 * @tags Tasks
 * @method GET
 * @route localhost:3000/tasks/id
@@ -155,7 +124,7 @@ app.post('/tasks', (req, res) => {
 * @failure 500 {string} - "Server error."
 */
 // Ende AI-Eingriff
-app.get('/tasks/:id', (req, res) => {
+router.get('/tasks/:id', (req, res) => {
     if (!checkSession(req)) {
         console.warn("session check failed");
         return res.status(401).json({ error: "unauthorized" });
@@ -176,6 +145,7 @@ app.get('/tasks/:id', (req, res) => {
 // Mit Hilfestellung von AI erstellt
 /**
 * @name PUT task
+* @description Update a task
 * @tags Tasks
 * @method PUT
 * @route localhost:3000/tasks/id
@@ -188,10 +158,10 @@ app.get('/tasks/:id', (req, res) => {
 * @failure 500 {string} - "Server error."
 */
 // Ende AI-Eingriff
-app.put('/tasks/:id', (req, res) => {
+router.put('/tasks/:id', (req, res) => {
     if (!checkSession(req)) {
         console.warn("session check failed");
-        return res.status(401).json({ error: "unauthorized" });
+        res.status(401).json({ error: "unauthorized" });
     } 
     try {
         const id = parseInt(req.params.id);
@@ -231,6 +201,7 @@ app.put('/tasks/:id', (req, res) => {
 // Mit Hilfestellung von AI erstellt
 /**
 * @name DELETE task 
+* @description Delete a task
 * @tags Tasks
 * @method DELETE
 * @route localhost:3000/tasks/id
@@ -241,7 +212,7 @@ app.put('/tasks/:id', (req, res) => {
 * @failure 500 {string} - "Server error."
 */
 // Ende AI-Eingriff
-app.delete('/tasks/:id', (req, res) => {
+router.delete('/tasks/:id', (req, res) => {
     if (!checkSession(req)) {
         console.warn("session check failed");
         return res.status(401).json({ error: "unauthorized" });
@@ -265,112 +236,5 @@ app.delete('/tasks/:id', (req, res) => {
     }
 })
 
-// Mit Hilfestellung von AI erstellt
-/**
-* @name POST login
-* @tags Auth
-* @method POST
-* @route localhost:3000/login
-* @type Content-Type: application/json
-* @body { "email": "zli", "password": "m295" }
-* @success 200 {Object} swagger-autput.json
-* @failure 404 {string} - "credentials are missing"
-* @failure 500 {string} - "Server error."
-*/
-// Ende AI-Eingriff
-app.post("/login", (req, res) => {
-    try {
-        const cred = req.body;
-        console.warn(cred)
-        //     // in Postman:
-        //     // body = {
-        //     //     username: "zli"
-        //     //     password: 1234,
-        //     // }
-            if (!cred.password) {
-                return res.setHeader('Content-Type', 'application/json').status(404).json({ error: 'credentials are missing'}).end();
-            }
-            req.session.authenticated = true
-            output = req.session
-            res.setHeader('Content-Type', 'application/json').status(200).json(output).end();
-    
-    } catch (error) {
-        console.error(error);
-        res.setHeader('Content-Type', 'application/json').status(500).json({ error: 'Server error' }).end();
-    }
-    
-})
 
-// Mit Hilfestellung von AI erstellt
-/**
-* @name GET verify
-* @tags Auth
-* @method GET
-* @route localhost:3000/verify
-* @type Content-Type: application/json
-* @success 200 {string} - "authenticated"
-* @failure 401 {string} - "unauthorized" || "not authenticated"
-* @failure 500 {string} - "Server error."
-*/
-// Ende AI-Eingriff
-app.get('/verify', (req, res) => {
-    if (!checkSession(req)) {
-        console.warn("session check failed");
-        return res.status(401).json({ error: "unauthorized" });
-    } 
-    try {
-        const session = req.session;
-        if (!session || !session.authenticated) {
-            res.setHeader('Content-Type', 'application/json').status(401).json({ error: "not authenticated" }).end();
-        }
-        res.setHeader('Content-Type', 'application/json').status(200).json({ message: "authenticated"}).end();    
-    } catch (error) {
-        console.error(error);
-        res.setHeader('Content-Type', 'application/json').status(500).json({ error: 'Server error' }).end();
-    }
-    
-})
-
-// Mit Hilfestellung von AI erstellt
-/**
- * @name DELETE logout
-* @tags Auth
-* @method POST
-* @route localhost:3000/logout
-* @type Content-Type: application/json
-* @success 204 {Object} SessionCookie 
-* @failure 401 {string} - "not authorized"
-* @failure 404 {string} - "no session found"
-* @failure 500 {string} - "Server error."
-*/
-// Ende AI-Eingriff
-app.delete('/logout', (req, res) => {
-    if (!checkSession(req)) {
-        console.warn("session check failed");
-        return res.status(401).json({ error: "unauthorized" });
-    } 
-    try {
-        const session = req.session;
-        if (!session) {
-            res.setHeader('Content-Type', 'application/json').status(404).json({ error: "no session found" }).end();
-        }
-        if (!session.authenticated) {
-            res.setHeader('Content-Type', 'application/json').status(401).json({ error: "not authorized" }).end();
-        }
-        session.authenticated = false
-        res.setHeader('Content-Type', 'application/json').status(204).end();
-    } catch (error) {
-        console.error(error);
-        res.setHeader('Content-Type', 'application/json').status(500).json({ error: 'Server error' }).end();
-    }   
-})
-
-function checkSession(req) {
-    const session = req.session;
-    return session && session.authenticated;
-}
-
-
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
+module.exports = router;
