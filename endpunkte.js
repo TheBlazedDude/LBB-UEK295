@@ -1,10 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const basicAuth = require('express-basic-auth')
 var session = require('express-session')
-const swaggerAutogen = require('swagger-autogen');
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger-output.json');
+// const swaggerAutogen = require('swagger-autogen');
+// const swaggerUi = require('swagger-ui-express');
+// const swaggerDocument = require('./swagger-output.json');
 
 const app = express();
 const port = 3000;
@@ -45,10 +44,14 @@ const tasks = [{
     "author": "Benedict Brück" 
 }]
 
+const users = {};
+
+const tokens = {};
+
 
 dotenv.config();
-users[process.env.USER_NAME] = process.env.PASSWORD;
-if (!process.env.USER_NAME || !process.env.PASSWORD) {
+users[process.env.EMAIL] = process.env.PASSWORD;
+if (!process.env.EMAIL || !process.env.PASSWORD) {
     console.error('USERNAME and PASSWORD must be set in the .env file');
     process.exit(1);
 }
@@ -111,9 +114,12 @@ app.put('/tasks/:id', (req, res) => {
     const changedtask = req.body;
     // in Postman:
     // body = {
-    //     title: "The Fail"
+    //     title: "The Wall"
+    //    "description": "this is a description of the task",
+    //    "done": true,
+    //    "dueDate": "27.08.1996",
     //     year: 1996,
-    //     author: "Max Master"  
+    //     author: "Benedict Brück"  
     // }
     const taskIndex = tasks.findIndex(task => task.id === id);
     tasks[taskIndex].Title = req.body.title;
@@ -137,6 +143,41 @@ app.delete('/tasks/:id', (req, res) => {
 
 })
 
+
+// login
+app.post("/login", (req, res) => {
+    const cred = req.body;
+    console.warn(cred)
+    //     // in Postman:
+    //     // body = {
+    //     //     username: "zli"
+    //     //     password: 1234,
+    //     // }
+        if (!cred.EMAIL || !cred.PASSWORD) {
+            return res.setHeader('Content-Type', 'application/json').status(404).json({ error: 'credentials are missing'}).end();
+        }
+        req.session.authenticated = true
+        output = req.session
+        res.setHeader('Content-Type', 'application/json').status(200).json(output).end();
+
+})
+
+// verify
+app.get('/verify', (req, res) => {
+    const session = req.session;
+    if (!session || !session.authenticated) {
+        res.setHeader('Content-Type', 'application/json').status(401).json({ error: "not authenticated" }).end();
+    }
+    res.setHeader('Content-Type', 'application/json').status(200).json({ message: "you are authenticated"}).end();    
+})
+
+// logout
+app.delete('/logout', (req, res) => {
+        const session = req.session;
+        session.authenticated = false
+        res.setHeader('Content-Type', 'application/json').status(204).end();
+    
+})
 
 function checkSession(req) {
     const session = req.session;
