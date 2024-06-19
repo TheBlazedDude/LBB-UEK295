@@ -60,36 +60,48 @@ if (!process.env.EMAIL || !process.env.PASSWORD) {
 
 // GET all tasks
 app.get('/tasks', (req, res) => {
+    if (!checkSession(req)) {
+        console.warn("session check failed");
+        return res.status(401).json({ error: "unauthorized" });
+    }
+    else {
         res.setHeader('Content-Type', 'application/json').status(200).json(tasks).end();
-
+    }
 })
 
 
 
 // POST new task
 app.post('/tasks', (req, res) => {
-    const body = req.body;
-    // in Postman:
-    // body = {
-    //     title: "The Fall"
-    //    "description": "this is a description of the task",
-    //    "done": true,
-    //    "dueDate": "27.08.1996",
-    //     year: 1996,
-    //     author: "Benedict Brück"  
-    // }
-
-    const newtask = {
-        "id": tasks.length + 1,
-        "title": body.title,
-        "description": body.description,
-        "done": body.done,
-        "dueDate": body.dueDate,
-        "year": body.year,
-        "author": body.author
+    if (!checkSession(req)) {
+        console.warn("session check failed");
+        return res.status(401).json({ error: "unauthorized" });
     }
-    tasks.push(newtask)
-    res.setHeader('Content-Type', 'application/json').status(201).json(tasks[tasks.length-1]).end();
+    else {
+        const body = req.body;
+        // in Postman:
+        // body = {
+        //     title: "The Fall"
+        //    "description": "this is a description of the task",
+        //    "done": true,
+        //    "dueDate": "27.08.1996",
+        //     year: 1996,
+        //     author: "Benedict Brück"  
+        // }
+    
+        const newtask = {
+            "id": tasks.length + 1,
+            "title": body.title,
+            "description": body.description,
+            "done": body.done,
+            "dueDate": body.dueDate,
+            "year": body.year,
+            "author": body.author
+        }
+        tasks.push(newtask)
+        res.setHeader('Content-Type', 'application/json').status(201).json(tasks[tasks.length-1]).end();
+    }
+    
 })
 
 
@@ -97,42 +109,57 @@ app.post('/tasks', (req, res) => {
 
 // GET 1 task
 app.get('/tasks/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const taskIndex = id - 1;
-    res.setHeader('Content-Type', 'application/json').status(200).json(tasks[taskIndex]).end();
-
+    if (!checkSession(req)) {
+        console.warn("session check failed");
+        return res.status(401).json({ error: "unauthorized" });
+    } 
+    else {
+        const id = parseInt(req.params.id);
+        const taskIndex = id - 1;
+        res.setHeader('Content-Type', 'application/json').status(200).json(tasks[taskIndex]).end();
+    }
 })
 
 
 
 // PUT
 app.put('/tasks/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    if (id <= 0) {
-        return res.setHeader('Content-Type', 'application/json').status(404).json({ error: 'id is not valid' }).end();
+    if (!checkSession(req)) {
+        console.warn("session check failed");
+        return res.status(401).json({ error: "unauthorized" });
+    } 
+    else {
+        const id = parseInt(req.params.id);
+        if (id <= 0) {
+            return res.setHeader('Content-Type', 'application/json').status(404).json({ error: 'id is not valid' }).end();
+        }
+        const changedtask = req.body;
+        // in Postman:
+        // body = {
+        //     title: "The Wall"
+        //    "description": "this is a description of the task",
+        //    "done": true,
+        //    "dueDate": "27.08.1996",
+        //     year: 1996,
+        //     author: "Benedict Brück"  
+        // }
+        const taskIndex = tasks.findIndex(task => task.id === id);
+        tasks[taskIndex].Title = req.body.title;
+        tasks[taskIndex].year = req.body.year;
+        tasks[taskIndex].author = req.body.author;
+        res.setHeader('Content-Type', 'application/json').status(200).json(tasks[taskIndex]).end();
     }
-    const changedtask = req.body;
-    // in Postman:
-    // body = {
-    //     title: "The Wall"
-    //    "description": "this is a description of the task",
-    //    "done": true,
-    //    "dueDate": "27.08.1996",
-    //     year: 1996,
-    //     author: "Benedict Brück"  
-    // }
-    const taskIndex = tasks.findIndex(task => task.id === id);
-    tasks[taskIndex].Title = req.body.title;
-    tasks[taskIndex].year = req.body.year;
-    tasks[taskIndex].author = req.body.author;
-    res.setHeader('Content-Type', 'application/json').status(200).json(tasks[taskIndex]).end();
-
 })
 
 
 
 // DELETE
 app.delete('/tasks/:id', (req, res) => {
+    if (!checkSession(req)) {
+        console.warn("session check failed");
+        return res.status(401).json({ error: "unauthorized" });
+    } 
+    else {
         const id = parseInt(req.params.id);
         taskIndex = tasks.findIndex(task => task.id === id);
         if(!taskIndex) {
@@ -140,7 +167,7 @@ app.delete('/tasks/:id', (req, res) => {
         }
         tasks.splice(taskIndex, 1);
         res.setHeader('Content-Type', 'application/json').status(204).end();
-
+    }
 })
 
 
@@ -164,19 +191,31 @@ app.post("/login", (req, res) => {
 
 // verify
 app.get('/verify', (req, res) => {
-    const session = req.session;
-    if (!session || !session.authenticated) {
-        res.setHeader('Content-Type', 'application/json').status(401).json({ error: "not authenticated" }).end();
+    if (!checkSession(req)) {
+        console.warn("session check failed");
+        return res.status(401).json({ error: "unauthorized" });
+    } 
+    else {
+        const session = req.session;
+        if (!session || !session.authenticated) {
+            res.setHeader('Content-Type', 'application/json').status(401).json({ error: "not authenticated" }).end();
+        }
+        res.setHeader('Content-Type', 'application/json').status(200).json({ message: "you are authenticated"}).end();    
     }
-    res.setHeader('Content-Type', 'application/json').status(200).json({ message: "you are authenticated"}).end();    
+    
 })
 
 // logout
 app.delete('/logout', (req, res) => {
+    if (!checkSession(req)) {
+        console.warn("session check failed");
+        return res.status(401).json({ error: "unauthorized" });
+    } 
+    else {
         const session = req.session;
         session.authenticated = false
         res.setHeader('Content-Type', 'application/json').status(204).end();
-    
+    }    
 })
 
 function checkSession(req) {
